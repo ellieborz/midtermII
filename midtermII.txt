@@ -1,0 +1,146 @@
+1. MIPS systems is comprised of 32 registers, which are grouped into sections(&a0-$a3, $s0-$s3, etc.) and have specific commands depending on the segment they fall into. They need a name in order to specify the exact memory location within the system. The names are also used to establish the sections they fall into. For instance $ra or register number 31 has that name to designate that as where the return address is stored exclusively. 
+
+2. $a0 - $a3
+
+3. $s0 - $s3
+
+4a. The add instruction adds the values of two registers to a register while addi adds a constant to the register.
+
+4b.The MIPS pseudo instructions are instructions that the assembler can break down into actual instructions. This abstraction allows for more abilities than the small amount of actual MIPS interactions available.
+
+4c. Assembler directives are the instructions to the assembler that specify an action during assembly. Assembler directives can be identified by the period at the beginning of the instruction. An important use they have is to declare memory variables. For instance, .asciiz tells the assembler to store to the succeeding data as a string in the data segment and add a null terminator. This terminator is important because it tells the assembler where the string ends. Without it, the system will keep on printing characters. Another example is .text, which tells the assembler the next information is what it needs to assemble. Without it, the assembler could not tell the difference between the data that it needs to store and the instructions it needs to preform.
+
+5.
+
+.data
+
+.text
+   main:
+      
+      addi $s0, $0, 1
+      addi $s1, $0, 1
+      
+      beq $s0, $s1, numbersEqual #if($s0 == $s1)
+      
+      addi $s3, $0, 1
+
+      li $v0, 10
+      syscall
+	      
+  numbersEqual:
+
+     add $s2, $s0, $s1
+   
+     li $v0, 10
+     syscall
+
+
+6.
+
+.data
+
+.text
+  main:
+
+      addi $s1, $0, 1
+      addi $s2, $0, 5	
+
+      beq $s0, $s1, equal #immediate exit if equal
+        
+      j LOOP
+
+LOOP: #if(s2<s1)
+    
+    beq $s2 $0 smaller
+    sub $s2, $s2, 1
+    beq $s2 $s1 greater
+
+    j LOOP
+
+
+
+smaller: 
+      addi $s1, $0, 0xF
+      li $v0, 10
+      syscall	
+greater:
+      li $v0, 10
+      syscall
+equal: 
+      li $v0, 10
+      syscall
+
+
+7.
+
+.data
+    STR: .asciiz "Done with MIPS!"
+
+.text
+
+main:
+    li $t0, 8
+
+    #Passing in 8 as argument on stack
+    addi $sp, $sp -4
+    sw $t0, 0($sp)
+
+    #Calling Bar
+    jal bar
+    #Popping argument of stack
+    addi $sp, $sp, 4
+
+    add $s0, $v0, $0
+    add $a0, $s0, $0
+    li $v0, 1
+    syscall 
+
+    
+    
+    la $a0, STR
+    addi $v0, $0, 4
+    syscall;
+    j done
+
+bar:
+    addi $sp, $sp, -4
+    sw $ra, 0($sp)
+
+    #Saving t0 onto stack
+    addi $sp, $sp, -4
+    sw $t0, 0($sp)
+
+    #Storing t1 and returning it later
+    addi $sp $sp, -4
+    sw $t1, 0($sp)
+
+    #Loading argument and with 2
+    lw $t0, 12($sp)
+    andi $t0, $t0, 10
+
+    #Loading in 10
+    addi $t1, $0, 10
+
+    bne $t1, $t0, endIf
+
+    #If 
+    addi $t0, $t0, 10
+
+endIf: 
+
+    addi $v0, $t0, 0
+
+    #Restoring t1, t0, ra. Jumping back to main 
+    lw $t1, 0($sp)
+    lw $t0, 4($sp)
+    lw $ra, 8($sp)
+    addi $sp, $sp, 12
+
+    jr $ra
+
+
+
+#Exiting Program 
+done: 
+    addi $v0, $0, 10
+    syscall 
